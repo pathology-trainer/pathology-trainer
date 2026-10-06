@@ -1,4 +1,4 @@
-const CACHE_NAME = "pathology-trainer-rk1-v4-clean";
+const CACHE_NAME = "pathology-trainer-rk1-v5-feedback1";
 const APP_SHELL = [
   "./",
   "./index.html",
