@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#16181d" />
+  <meta name="color-scheme" content="light" />
+  <meta name="description" content="Неофициальный некоммерческий учебный тренажёр по патологии: тренировка, экзамен и работа над ошибками." />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; media-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Патология" />
+  <title>Pathology Trainer — РК №1</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" id="brandButton" type="button" aria-label="На главную">
+      <span class="brand-mark">PT</span>
+      <span><strong>Pathology Trainer</strong><small>РК №1 · 251 вопрос</small></span>
+    </button>
+    <div class="top-actions">
+      <span class="network-pill" id="networkPill" aria-live="polite">Онлайн</span>
+      <button class="install-button" id="installButton" type="button">Установить</button>
+      <button class="icon-button" id="resetButton" type="button" title="Сбросить прогресс" aria-label="Сбросить прогресс">↺</button>
+    </div>
+  </header>
+
+  <main id="app" class="app-shell" aria-live="polite"></main>
+
+  <footer class="footer">
+    <div class="source-notice">
+      <strong>Источник вопросов:</strong> ФГБОУ ВО РязГМУ Минздрава России, материалы образовательных программ и комплекты оценочных материалов.
+      <span>Неофициальный некоммерческий тренажёр для самостоятельной подготовки студентов. Не является официальным сервисом РязГМУ.</span>
+      <a href="https://www.rzgmu.ru/sveden/education/eduop/" target="_blank" rel="noopener noreferrer external">Официальный источник на rzgmu.ru</a>
+    </div>
+    <div class="footer-meta">Прогресс и список ошибок хранятся только в браузере на этом устройстве и не отправляются разработчику.</div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="install-dialog" id="installDialog">
+    <div class="dialog-head">
+      <strong>Установить как приложение</strong>
+      <button class="dialog-close" id="closeInstallDialog" type="button" aria-label="Закрыть">×</button>
+    </div>
+    <div id="installDialogBody" class="dialog-body"></div>
+  </dialog>
+
+  <script src="data/questions.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
