@@ -1,4 +1,4 @@
-const CACHE_NAME = "pathology-trainer-rk1-v6-feedback2";
+const CACHE_NAME = "pathology-trainer-rk1-v7-bank-cachefix";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -25,22 +25,41 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+function isLiveResource(request, url) {
+  if (request.mode === "navigate") return true;
+  return [".js", ".css", ".webmanifest", ".html"].some(ext => url.pathname.endsWith(ext));
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request, { cache: "no-store" });
+    if (response && response.status === 200) {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    if (request.mode === "navigate") return caches.match("./index.html");
+    throw new Error("offline");
+  }
+}
+
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response && response.status === 200 && response.type !== "opaque") {
+    const copy = response.clone();
+    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+  }
+  return response;
+}
+
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
-  const requestUrl = new URL(event.request.url);
-  if (requestUrl.origin !== self.location.origin) return;
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200 || response.type === "opaque") return response;
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      }).catch(() => {
-        if (event.request.mode === "navigate") return caches.match("./index.html");
-        throw new Error("offline");
-      });
-    })
-  );
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+  event.respondWith(isLiveResource(event.request, url) ? networkFirst(event.request) : cacheFirst(event.request));
 });
