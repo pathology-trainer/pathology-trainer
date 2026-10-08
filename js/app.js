@@ -88,7 +88,7 @@
         <div class="hero-main">
           <div class="eyebrow">РК №1 · Патология</div>
           <h1>Тренажёр как экзамен ПДД.</h1>
-          <p>251 вопрос из твоего Word-файла. Проходи тренировку или экзамен, а потом отдельно разбирай только те задания, где ошибся.</p>
+          <p>251 вопрос в одном месте: проходи тренировку или экзамен, разбирай ошибки или открой весь банк и учи вопросы вместе с правильными ответами.</p>
         </div>
         <div class="hero-stats">
           <div class="stat-line"><strong>${QUESTIONS.length}</strong><span>вопросов в базе</span></div>
@@ -125,8 +125,89 @@
           <p>Повтори вопросы, на которых ошибался. Правильный повтор убирает вопрос из текущих ошибок.</p>
           <span class="mode-meta">${s.mistakes ? `Повторить ${s.mistakes}` : "Ошибок пока нет"}</span>
         </button>
+        <button class="mode-card" data-action="question-bank">
+          <span class="mode-icon">≡</span>
+          <h3>Банк вопросов</h3>
+          <p>Смотри все вопросы подряд, раскрывай правильные ответы и ищи по номеру или тексту.</p>
+          <span class="mode-meta">Открыть ${QUESTIONS.length} вопросов →</span>
+        </button>
       </section>
     `;
+  }
+
+  function renderQuestionBank() {
+    clearTimer();
+    const cards = QUESTIONS.map(q => {
+      const answers = q.correct
+        .map(idx => q.options[idx])
+        .filter(Boolean)
+        .map(answer => `<div class="bank-answer-item">${escapeHtml(answer)}</div>`)
+        .join("");
+      return `
+        <details class="bank-card" data-bank-id="${q.id}">
+          <summary>
+            <span class="bank-id">ID ${q.id}</span>
+            <span class="bank-question">${escapeHtml(q.question)}</span>
+            <span class="bank-chevron" aria-hidden="true">▾</span>
+          </summary>
+          <div class="bank-answer">
+            <strong>${q.multiple ? "Правильные ответы" : "Правильный ответ"}</strong>
+            ${answers}
+          </div>
+        </details>`;
+    }).join("");
+
+    app.innerHTML = `
+      <section class="panel bank-panel">
+        <div class="panel-head bank-head">
+          <div>
+            <h1>Банк вопросов</h1>
+            <p>Нажми на вопрос, чтобы открыть правильный ответ. Поиск работает по ID, вопросу и вариантам ответа.</p>
+          </div>
+          <button class="btn btn-secondary" data-action="home">← На главную</button>
+        </div>
+        <div class="bank-toolbar">
+          <label class="bank-search-wrap" for="bankSearch">
+            <span>Поиск</span>
+            <input id="bankSearch" class="bank-search" type="search" inputmode="search" placeholder="Например: 187, моносомия, некроз" autocomplete="off" />
+          </label>
+          <div class="bank-toolbar-actions">
+            <button class="btn btn-secondary" data-action="bank-show-all">Показать все ответы</button>
+            <button class="btn btn-secondary" data-action="bank-hide-all">Скрыть все</button>
+          </div>
+        </div>
+        <div class="bank-count" id="bankCount">Показано ${QUESTIONS.length} из ${QUESTIONS.length}</div>
+        <div class="bank-list" id="bankList">${cards}</div>
+        <div class="bank-empty" id="bankEmpty" hidden>Ничего не найдено. Попробуй другой номер или текст.</div>
+        <div class="actions bank-bottom-actions">
+          <button class="btn btn-secondary" data-action="home">← На главную</button>
+          <button class="btn btn-primary" data-action="bank-to-top">Наверх ↑</button>
+        </div>
+      </section>`;
+  }
+
+  function filterQuestionBank(query) {
+    const normalized = String(query || "").trim().toLocaleLowerCase("ru-RU");
+    const cards = [...app.querySelectorAll(".bank-card")];
+    let visible = 0;
+    cards.forEach(card => {
+      const id = Number(card.dataset.bankId);
+      const q = qById.get(id);
+      const haystack = q
+        ? `${q.id} ${q.question} ${q.options.join(" ")}`.toLocaleLowerCase("ru-RU")
+        : "";
+      const show = !normalized || haystack.includes(normalized);
+      card.hidden = !show;
+      if (show) visible += 1;
+    });
+    const count = document.getElementById("bankCount");
+    if (count) count.textContent = `Показано ${visible} из ${QUESTIONS.length}`;
+    const empty = document.getElementById("bankEmpty");
+    if (empty) empty.hidden = visible !== 0;
+  }
+
+  function setQuestionBankOpen(open) {
+    app.querySelectorAll(".bank-card:not([hidden])").forEach(card => { card.open = open; });
   }
 
   function renderSettings(mode) {
@@ -501,6 +582,10 @@
     if (action === "start-training") startConfigured("training");
     if (action === "start-exam") startConfigured("exam");
     if (action === "mistakes") startMistakes();
+    if (action === "question-bank") renderQuestionBank();
+    if (action === "bank-show-all") setQuestionBankOpen(true);
+    if (action === "bank-hide-all") setQuestionBankOpen(false);
+    if (action === "bank-to-top") window.scrollTo({ top: 0, behavior: "smooth" });
     if (action === "check") checkCurrent();
     if (action === "save-next") saveExamCurrentAndNext();
     if (action === "next") {
@@ -513,6 +598,10 @@
     }
     if (action === "review-session") renderReview();
     if (action === "repeat-problems") repeatProblems();
+  });
+
+  app.addEventListener("input", (event) => {
+    if (event.target?.id === "bankSearch") filterQuestionBank(event.target.value);
   });
 
   document.getElementById("brandButton").addEventListener("click", renderHome);
