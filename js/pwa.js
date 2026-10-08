@@ -92,10 +92,21 @@
   updateInstallButton();
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController || refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    window.addEventListener("load", async () => {
+      try {
+        const registration = await navigator.serviceWorker.register("./sw.js");
+        await registration.update();
+      } catch {
         showToast("Офлайн-режим не удалось включить");
-      });
+      }
     });
   }
 })();
