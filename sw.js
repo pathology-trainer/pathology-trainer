@@ -1,11 +1,18 @@
-const CACHE_NAME = "pathology-trainer-rk1-v7-bank-cachefix";
+const CACHE_NAME = "pathology-trainer-catalog-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./rk1.html",
+  "./css/catalog.css",
   "./css/app.css",
+  "./js/catalog.js",
   "./js/app.js",
   "./js/pwa.js",
   "./data/questions.js",
+  "./assets/c-diphtheriae-micrograph.jpg",
+  "./assets/coming-soon-coder-cartoon.png",
+  "./assets/coming-soon-comic-cartoon.png",
+  "./assets/coming-soon-textbooks-cartoon.png",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
