@@ -1,11 +1,13 @@
 (() => {
   "use strict";
 
+  const CONFIG = window.PATHOLOGY_RK_CONFIG || {};
+  const RK_NUMBER = Number(CONFIG.number) || 1;
   const QUESTIONS = Array.isArray(window.PATHOLOGY_QUESTIONS) ? window.PATHOLOGY_QUESTIONS : [];
   const qById = new Map(QUESTIONS.map(q => [q.id, q]));
   const app = document.getElementById("app");
-  const STORAGE_KEY = "pathologyTrainerProgressV1";
-  const SESSION_KEY = "pathologyTrainerActiveSessionV1";
+  const STORAGE_KEY = CONFIG.storageKey || "pathologyTrainerProgressV1";
+  const SESSION_KEY = CONFIG.sessionKey || "pathologyTrainerActiveSessionV1";
   let session = null;
   let timerHandle = null;
 
@@ -78,6 +80,13 @@
     return { attemptedUnique, pct, mistakes: progress.mistakes.length };
   }
 
+  function questionCountLabel(count) {
+    const tail = count % 100;
+    const digit = count % 10;
+    const word = tail >= 11 && tail <= 14 ? "вопросов" : digit === 1 ? "вопрос" : digit >= 2 && digit <= 4 ? "вопроса" : "вопросов";
+    return `${count} ${word}`;
+  }
+
   function renderHome() {
     clearTimer();
     session = null;
@@ -86,9 +95,9 @@
     app.innerHTML = `
       <section class="hero">
         <div class="hero-main">
-          <div class="eyebrow">РК №1 · Патология</div>
-          <h1>Подготовка к РК 1</h1>
-          <p>251 вопрос в одном месте: проходи тренировку или экзамен, разбирай ошибки или открой весь банк и учи вопросы вместе с правильными ответами.</p>
+          <div class="eyebrow">РК №${RK_NUMBER} · Патология</div>
+          <h1>Подготовка к РК ${RK_NUMBER}</h1>
+          <p>${questionCountLabel(QUESTIONS.length)} в одном месте: проходи тренировку или экзамен, разбирай ошибки или открой весь банк и учи вопросы вместе с правильными ответами.</p>
         </div>
         <div class="hero-stats">
           <div class="stat-line"><strong>${QUESTIONS.length}</strong><span>вопросов в базе</span></div>
@@ -153,6 +162,7 @@
           <div class="bank-answer">
             <strong>${q.multiple ? "Правильные ответы" : "Правильный ответ"}</strong>
             ${answers}
+            ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
           </div>
         </details>`;
     }).join("");
@@ -169,7 +179,7 @@
         <div class="bank-toolbar">
           <label class="bank-search-wrap" for="bankSearch">
             <span>Поиск</span>
-            <input id="bankSearch" class="bank-search" type="search" inputmode="search" placeholder="Например: 187, моносомия, некроз" autocomplete="off" />
+            <input id="bankSearch" class="bank-search" type="search" inputmode="search" placeholder="Номер или фрагмент вопроса" autocomplete="off" />
           </label>
           <div class="bank-toolbar-actions">
             <button class="btn btn-secondary" data-action="bank-show-all">Показать все ответы</button>
@@ -361,6 +371,7 @@
           </div>
           <div class="question-body">
             <h2>${escapeHtml(q.question)}</h2>
+            ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
             ${q.multiple ? `<div class="multi-note">Можно выбрать несколько вариантов</div>` : ""}
             <div class="options">${optionHtml}</div>
             ${feedback}
@@ -506,6 +517,7 @@
           <h3>${i + 1}. ${escapeHtml(q.question)}</h3>
           <div class="answer-box user"><strong>Твой ответ</strong>${escapeHtml(userText)}</div>
           <div class="answer-box correct"><strong>Правильный ответ</strong>${escapeHtml(correctText)}</div>
+          ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
         </article>`;
     }).join("");
     app.innerHTML = `
@@ -614,7 +626,7 @@
   });
 
   if (!QUESTIONS.length) {
-    app.innerHTML = `<section class="panel"><h1>База вопросов не загрузилась</h1><p>Проверь файл data/questions.js.</p></section>`;
+    app.innerHTML = `<section class="panel"><h1>База вопросов не загрузилась</h1><p>Проверь файл ${escapeHtml(CONFIG.dataPath || "data/questions.js")}.</p></section>`;
   } else {
     const initialMode = new URLSearchParams(window.location.search).get("mode");
     if (initialMode === "training" || initialMode === "exam") renderSettings(initialMode);

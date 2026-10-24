@@ -1,8 +1,9 @@
-const CACHE_NAME = "pathology-trainer-catalog-v2";
+const CACHE_NAME = "pathology-trainer-catalog-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./rk1.html",
+  "./rk2.html",
   "./css/catalog.css",
   "./css/app.css",
   "./css/design-system.css",
@@ -11,6 +12,7 @@ const APP_SHELL = [
   "./js/app.js",
   "./js/pwa.js",
   "./data/questions.js",
+  "./data/rk2-questions.js",
   "./assets/c-diphtheriae-micrograph.jpg",
   "./assets/coming-soon-coder-cartoon.png",
   "./assets/coming-soon-comic-cartoon.png",

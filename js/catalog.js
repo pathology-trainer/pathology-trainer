@@ -1,7 +1,9 @@
     const PHOTO = 'assets/c-diphtheriae-micrograph.jpg';
     const PHOTO_SOURCE = 'https://commons.wikimedia.org/wiki/File:Corynebacterium_diphtheriae_Gram_stain.jpg';
     const searchItems = [
-      {label:'Патология', detail:'Контрольные работы · РК 1 доступна', view:'pathology'},
+      {label:'Патология', detail:'Контрольные работы · РК 1 и РК 2 доступны', view:'pathology'},
+      {label:'РК 1', detail:'Патология · 251 вопрос', view:'pathology', rk:1},
+      {label:'РК 2', detail:'Патология · 175 вопросов', view:'pathology', rk:2},
       {label:'Микробиология', detail:'Дифтерия · морфология · диагностика', view:'micro'},
       {label:'Corynebacterium diphtheriae', detail:'Морфология, вирулентность и лабораторная диагностика', view:'micro'},
       {label:'Внутренние болезни', detail:'Материалы скоро появятся', view:'internal'}
@@ -20,12 +22,12 @@
         <div class="breadcrumb">Каталог предметов</div>
         ${heading('Учебные материалы', 'Каталог предметов', 'Выберите дисциплину, затем нужную контрольную работу или тему. Материалы собраны так, чтобы каталог рос вместе с вашим курсом.')}
         <section class="feature" aria-label="Быстрый переход к патологии">
-          <div><div class="eyebrow">Продолжить подготовку</div><h2>Патология · РК 1</h2><p>Отдельный банк внутри предмета. В дальнейшем здесь появятся РК 2, РК 3 и следующие работы.</p><div class="feature-meta">Контрольная работа · отдельная статистика</div></div>
-          <div class="feature-action"><a class="btn-primary" href="rk1.html">Перейти к тестам РК 1</a></div>
+          <div><div class="eyebrow">Продолжить подготовку</div><h2>Патология · РК 1 и РК 2</h2><p>Два отдельных банка вопросов с тренировкой, экзаменом и работой над ошибками.</p><div class="feature-meta">Контрольные работы · отдельная статистика</div></div>
+          <div class="feature-action rk-actions"><a class="btn-primary" href="rk1.html">Тесты РК 1</a><a class="btn-primary" href="rk2.html">Тесты РК 2</a></div>
         </section>
         <div class="section-heading" id="subjects"><div><div class="eyebrow">Дисциплины</div><h2>Предметы</h2></div><small>Каталог можно расширять новыми предметами</small></div>
         <div class="subject-grid">
-          <button class="subject-card" type="button" data-view="pathology"><span class="card-top"></span><span class="card-body"><span class="card-index">01 / ТРЕНАЖЁР</span><h3>Патология</h3><p>Контрольные работы и повторение тем.</p><span class="card-footer"><span>Посмотреть РК</span><small>РК 1 доступна</small></span></span></button>
+          <button class="subject-card" type="button" data-view="pathology"><span class="card-top"></span><span class="card-body"><span class="card-index">01 / ТРЕНАЖЁР</span><h3>Патология</h3><p>Контрольные работы и повторение тем.</p><span class="card-footer"><span>Посмотреть РК</span><small>РК 1 и 2 доступны</small></span></span></button>
           <button class="subject-card micro" type="button" data-view="micro"><span class="card-top"></span><span class="card-body"><span class="card-index">02 / В РАБОТЕ</span><h3>Микробиология</h3><p>Corynebacterium diphtheriae: морфология, факторы вирулентности и диагностика.</p><span class="card-footer"><span>Открыть раздел</span><small>1 тема</small></span></span></button>
           <button class="subject-card internal" type="button" data-view="internal"><span class="card-top"></span><span class="card-body"><span class="card-index">03 / СКОРО</span><h3>Внутренние болезни</h3><p>Учебные материалы по предмету готовятся.</p><span class="card-footer"><span>Открыть раздел</span><small>Скоро</small></span></span></button>
         </div>
@@ -33,22 +35,23 @@
       rail.innerHTML = toc([['subjects','Предметы']], 'Как устроен каталог', 'Патология организована по РК. Микробиология — по возбудителям и методам. Внутренние болезни — по темам и препаратам.');
     }
     function pathology() {
-      const isReady = state.rk === 1;
+      const isReady = state.rk === 1 || state.rk === 2;
+      const trainerPage = `rk${state.rk}.html`;
       main.innerHTML = `${crumb('Патология')}
         ${heading('Патология / Контрольные работы', 'Патология', 'Для каждой РК предусмотрен отдельный банк и собственный путь подготовки. Выберите работу ниже.')}
-        ${teamStatus('Структура контрольных работ уже видна. Тесты РК 1 уже доступны. Команда готовит дополнительные материалы и следующие РК.')}
+        ${teamStatus('Тесты РК 1 и РК 2 доступны. Следующие материалы добавим в отдельные вкладки.')}
         <div class="tabs" role="tablist" aria-label="Контрольные работы">
-          ${[1,2,3].map(n=>`<button class="tab" type="button" role="tab" aria-selected="${state.rk===n}" data-rk="${n}">РК ${n}${n===1?' · доступна':''}</button>`).join('')}
+          ${[1,2,3].map(n=>`<button class="tab" type="button" role="tab" aria-selected="${state.rk===n}" data-rk="${n}">РК ${n}${n<=2?' · доступна':''}</button>`).join('')}
         </div>
         <section class="bank-panel" id="bank">
           <div class="bank-panel-heading">
             <div><div class="eyebrow">Контрольная работа ${state.rk}</div><h2>РК ${state.rk}${isReady?' · банк вопросов':''}</h2><p class="bank-panel-description">${isReady?'Структура тренажёра помогает сначала пройти вопросы, затем разобрать ошибки и вернуться к сложным темам.':'Так будет выглядеть следующая контрольная работа, когда её материалы будут добавлены в каталог.'}</p></div>
-            ${isReady?'<a class="btn-primary trainer-entry" href="rk1.html">Открыть тесты РК 1 →</a>':''}
+            ${isReady?`<a class="btn-primary trainer-entry" href="${trainerPage}">Открыть тесты РК ${state.rk} →</a>`:''}
           </div>
-          ${isReady?`<div class="mode-list" aria-label="Режимы подготовки"><a class="mode-row" href="rk1.html?mode=training"><b>Тренировка</b><span>Последовательное прохождение вопросов с разбором ответов.</span></a><a class="mode-row" href="rk1.html?mode=exam"><b>Экзамен</b><span>Отдельный режим для самопроверки перед коллоквиумом.</span></a><a class="mode-row" href="rk1.html?mode=mistakes"><b>Ошибки</b><span>Возврат к вопросам, в которых вы затруднились.</span></a></div>`:`<div class="source-strip"><b>Место для будущего банка</b><span>Нумерация и содержание появятся после загрузки исходных вопросов.</span></div>`}
+          ${isReady?`<div class="mode-list" aria-label="Режимы подготовки"><a class="mode-row" href="${trainerPage}?mode=training"><b>Тренировка</b><span>Последовательное прохождение вопросов с разбором ответов.</span></a><a class="mode-row" href="${trainerPage}?mode=exam"><b>Экзамен</b><span>Отдельный режим для самопроверки перед коллоквиумом.</span></a><a class="mode-row" href="${trainerPage}?mode=mistakes"><b>Ошибки</b><span>Возврат к вопросам, в которых вы затруднились.</span></a></div>`:`<div class="source-strip"><b>Место для будущего банка</b><span>Нумерация и содержание появятся после загрузки исходных вопросов.</span></div>`}
         </section>
         <div class="next-bank"><b>Как каталог будет расти</b>Новые РК добавляются как соседние вкладки. Предмет и привычная структура страницы сохраняются.</div>${end}`;
-      rail.innerHTML = toc([['bank','Выбранная РК']], 'Масштабирование', 'Когда добавятся РК 2 и РК 3, студент увидит их рядом с РК 1, без нового меню и без смешивания банков.');
+      rail.innerHTML = toc([['bank','Выбранная РК']], 'Отдельные банки', 'РК 1 и РК 2 открываются в отдельных тренажёрах. У каждой работы свой прогресс и список ошибок.');
     }
     function teamStatus(message) {
       return `<section class="coming-card compact" aria-label="Команда готовит учебные материалы">
@@ -108,12 +111,12 @@
       const q=siteSearch.value.trim().toLocaleLowerCase('ru');
       if(!q){searchResults.hidden=true;return;}
       const matches=searchItems.filter(x=>(x.label+' '+x.detail).toLocaleLowerCase('ru').includes(q));
-      searchResults.innerHTML=matches.length?matches.map(x=>`<button class="search-result" type="button" data-view="${x.view}"><strong>${x.label}</strong><small>${x.detail}</small></button>`).join(''):'<div class="search-empty">Ничего не найдено</div>';
+      searchResults.innerHTML=matches.length?matches.map(x=>`<button class="search-result" type="button" data-view="${x.view}" ${x.rk ? `data-search-rk="${x.rk}"` : ''}><strong>${x.label}</strong><small>${x.detail}</small></button>`).join(''):'<div class="search-empty">Ничего не найдено</div>';
       searchResults.hidden=false;
     }
     document.addEventListener('click',e=>{
       const view=e.target.closest('[data-view]');
-      if(view){navigate(view.dataset.view);return;}
+      if(view){if(view.dataset.searchRk) state.rk=Number(view.dataset.searchRk);navigate(view.dataset.view);return;}
       const rk=e.target.closest('[data-rk]');
       if(rk){state.rk=Number(rk.dataset.rk);render();document.getElementById('bank')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
       const anchor=e.target.closest('[data-anchor]');
