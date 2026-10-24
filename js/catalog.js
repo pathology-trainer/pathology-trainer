@@ -41,10 +41,11 @@
           ${[1,2,3].map(n=>`<button class="tab" type="button" role="tab" aria-selected="${state.rk===n}" data-rk="${n}">РК ${n}${n===1?' · доступна':''}</button>`).join('')}
         </div>
         <section class="bank-panel" id="bank">
-          <div class="eyebrow">Контрольная работа ${state.rk}</div>
-          <h2>РК ${state.rk}${isReady?' · банк вопросов':''}</h2>
-          <p>${isReady?'Структура тренажёра помогает сначала пройти вопросы, затем разобрать ошибки и вернуться к сложным темам.':'Так будет выглядеть следующая контрольная работа, когда её материалы будут добавлены в каталог.'}</p>
-          ${isReady?`<div class="mode-list"><div class="mode-row"><b>Тренировка</b><span>Последовательное прохождение вопросов с разбором ответов.</span></div><div class="mode-row"><b>Экзамен</b><span>Отдельный режим для самопроверки перед коллоквиумом.</span></div><div class="mode-row"><b>Ошибки</b><span>Возврат к вопросам, в которых вы затруднились.</span></div></div><a class="btn-primary trainer-entry" href="rk1.html">Открыть тесты РК 1 →</a>`:`<div class="source-strip"><b>Место для будущего банка</b><span>Нумерация и содержание появятся после загрузки исходных вопросов.</span></div>`}
+          <div class="bank-panel-heading">
+            <div><div class="eyebrow">Контрольная работа ${state.rk}</div><h2>РК ${state.rk}${isReady?' · банк вопросов':''}</h2><p class="bank-panel-description">${isReady?'Структура тренажёра помогает сначала пройти вопросы, затем разобрать ошибки и вернуться к сложным темам.':'Так будет выглядеть следующая контрольная работа, когда её материалы будут добавлены в каталог.'}</p></div>
+            ${isReady?'<a class="btn-primary trainer-entry" href="rk1.html">Открыть тесты РК 1 →</a>':''}
+          </div>
+          ${isReady?`<div class="mode-list" aria-label="Режимы подготовки"><a class="mode-row" href="rk1.html?mode=training"><b>Тренировка</b><span>Последовательное прохождение вопросов с разбором ответов.</span></a><a class="mode-row" href="rk1.html?mode=exam"><b>Экзамен</b><span>Отдельный режим для самопроверки перед коллоквиумом.</span></a><a class="mode-row" href="rk1.html?mode=mistakes"><b>Ошибки</b><span>Возврат к вопросам, в которых вы затруднились.</span></a></div>`:`<div class="source-strip"><b>Место для будущего банка</b><span>Нумерация и содержание появятся после загрузки исходных вопросов.</span></div>`}
         </section>
         <div class="next-bank"><b>Как каталог будет расти</b>Новые РК добавляются как соседние вкладки. Предмет и привычная структура страницы сохраняются.</div>${end}`;
       rail.innerHTML = toc([['bank','Выбранная РК']], 'Масштабирование', 'Когда добавятся РК 2 и РК 3, студент увидит их рядом с РК 1, без нового меню и без смешивания банков.');
@@ -86,6 +87,15 @@
         const active=b.dataset.view===state.view;
         if(active) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
       });
+      if(window.matchMedia('(max-width: 760px)').matches){
+        const sidebar=document.querySelector('.sidebar');
+        const active=sidebar?.querySelector('.side-item[aria-current="page"]');
+        if(active){
+          const rail=sidebar.getBoundingClientRect();
+          const item=active.getBoundingClientRect();
+          sidebar.scrollLeft+=item.left-rail.left-(rail.width-item.width)/2;
+        }
+      }
     }
     function navigate(view) {
       state.view=view;

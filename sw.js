@@ -1,10 +1,12 @@
-const CACHE_NAME = "pathology-trainer-catalog-v1";
+const CACHE_NAME = "pathology-trainer-catalog-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./rk1.html",
   "./css/catalog.css",
   "./css/app.css",
+  "./css/design-system.css",
+  "./css/unified.css",
   "./js/catalog.js",
   "./js/app.js",
   "./js/pwa.js",

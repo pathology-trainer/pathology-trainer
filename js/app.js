@@ -87,7 +87,7 @@
       <section class="hero">
         <div class="hero-main">
           <div class="eyebrow">РК №1 · Патология</div>
-          <h1>Тренажёр как экзамен ПДД.</h1>
+          <h1>Подготовка к РК 1</h1>
           <p>251 вопрос в одном месте: проходи тренировку или экзамен, разбирай ошибки или открой весь банк и учи вопросы вместе с правильными ответами.</p>
         </div>
         <div class="hero-stats">
@@ -616,6 +616,9 @@
   if (!QUESTIONS.length) {
     app.innerHTML = `<section class="panel"><h1>База вопросов не загрузилась</h1><p>Проверь файл data/questions.js.</p></section>`;
   } else {
-    renderHome();
+    const initialMode = new URLSearchParams(window.location.search).get("mode");
+    if (initialMode === "training" || initialMode === "exam") renderSettings(initialMode);
+    else if (initialMode === "mistakes") startMistakes();
+    else renderHome();
   }
 })();
