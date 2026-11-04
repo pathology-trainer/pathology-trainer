@@ -92,6 +92,7 @@
     if (questionKind(q) === "sequence") {
       return q.correct.length === a.selected.length && q.correct.every((index, position) => index === a.selected[position]);
     }
+    if (q.acceptAny) return a.selected.length === 1 && q.correct.includes(a.selected[0]);
     return sameSet(a.selected, q.correct);
   }
 
@@ -198,7 +199,7 @@
             <span class="bank-chevron" aria-hidden="true">▾</span>
           </summary>
           <div class="bank-answer">
-            <strong>${questionKind(q) === "sequence" ? "Правильная последовательность" : questionKind(q) === "matching" ? "Правильные соответствия" : q.multiple ? "Правильные ответы" : "Правильный ответ"}</strong>
+            <strong>${questionKind(q) === "sequence" ? "Правильная последовательность" : questionKind(q) === "matching" ? "Правильные соответствия" : q.acceptAny ? "Допустимые ответы — достаточно одного" : q.multiple ? "Правильные ответы" : "Правильный ответ"}</strong>
             ${questionKind(q) === "matching" ? `<p>Варианты: ${q.options.map((option, index) => `${index + 1}. ${escapeHtml(option)}`).join("; ")}</p>` : ""}
             ${answers}
             ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
@@ -445,6 +446,7 @@
           <div class="question-body">
             <h2>${escapeHtml(q.question)}</h2>
             ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
+            ${q.acceptAny ? `<div class="multi-note">Достаточно выбрать один из допустимых ответов</div>` : ""}
             ${questionKind(q) === "matching" && q.multiple ? `<div class="multi-note">К каждому пункту можно выбрать несколько номеров</div>` : questionKind(q) === "choice" && q.multiple ? `<div class="multi-note">Можно выбрать несколько вариантов</div>` : ""}
             ${inputHtml}
             ${feedback}
@@ -620,7 +622,7 @@
         <article class="review-card">
           <h3>${i + 1}. ${escapeHtml(q.question)}</h3>
           <div class="answer-box user"><strong>Твой ответ</strong>${escapeHtml(userText)}</div>
-          <div class="answer-box correct"><strong>Правильный ответ</strong>${escapeHtml(correctText)}</div>
+          <div class="answer-box correct"><strong>${q.acceptAny ? "Допустимые ответы — достаточно одного" : "Правильный ответ"}</strong>${escapeHtml(correctText)}</div>
           ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
         </article>`;
     }).join("");

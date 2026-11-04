@@ -1,4 +1,4 @@
-const CACHE_NAME = "pathology-trainer-catalog-v4";
+const CACHE_NAME = "pathology-trainer-catalog-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
