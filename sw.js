@@ -1,9 +1,10 @@
-const CACHE_NAME = "pathology-trainer-catalog-v5";
+const CACHE_NAME = "pathology-trainer-catalog-v8-results-1";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./rk1.html",
   "./rk2.html",
+  "./rk3.html",
   "./css/catalog.css",
   "./css/app.css",
   "./css/design-system.css",
@@ -13,6 +14,7 @@ const APP_SHELL = [
   "./js/pwa.js",
   "./data/questions.js",
   "./data/rk2-questions.js",
+  "./data/rk3-questions.js",
   "./assets/c-diphtheriae-micrograph.jpg",
   "./assets/coming-soon-coder-cartoon.png",
   "./assets/coming-soon-comic-cartoon.png",
@@ -50,7 +52,7 @@ async function networkFirst(request) {
     }
     return response;
   } catch {
-    const cached = await caches.match(request);
+    const cached = await caches.match(request, { ignoreSearch: request.mode === "navigate" });
     if (cached) return cached;
     if (request.mode === "navigate") return caches.match("./index.html");
     throw new Error("offline");

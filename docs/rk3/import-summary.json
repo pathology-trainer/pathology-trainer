@@ -1,0 +1,94 @@
+{
+  "source": "RK_3_MPF.docx",
+  "sha256": "545600c45e5f36b1f5c8e9cb091fcda972d3ed5ebc416434c7a6628d6009360e",
+  "source_nonempty_paragraphs": 823,
+  "questions": 157,
+  "options": 665,
+  "correct_options": 157,
+  "manual_option_paragraphs_zero_based": [
+    156,
+    193
+  ],
+  "duplicate_full_items": [
+    [
+      81,
+      101
+    ],
+    [
+      83,
+      102
+    ],
+    [
+      85,
+      103
+    ]
+  ],
+  "conflicting_duplicate_keys": [],
+  "repeated_prompts": [
+    [
+      13,
+      18
+    ],
+    [
+      14,
+      16
+    ],
+    [
+      34,
+      35,
+      36,
+      39
+    ],
+    [
+      49,
+      55,
+      57
+    ],
+    [
+      81,
+      101
+    ],
+    [
+      83,
+      102
+    ],
+    [
+      85,
+      103
+    ],
+    [
+      133,
+      134,
+      136
+    ],
+    [
+      137,
+      138
+    ],
+    [
+      139,
+      141
+    ],
+    [
+      148,
+      149
+    ]
+  ],
+  "review_keys": [
+    28,
+    38,
+    41,
+    55,
+    109,
+    131,
+    143
+  ],
+  "pagination": "Last-saved Word page-break markers; not freshly rendered or verified page references",
+  "source_question_numbering": "No explicit question numbers in Word; site IDs follow source order, including repeats",
+  "option_counts": {
+    "4": 70,
+    "5": 67,
+    "3": 10,
+    "2": 10
+  }
+}

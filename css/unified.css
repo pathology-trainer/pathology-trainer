@@ -1,4 +1,4 @@
-/* Shared presentation for the catalog and the RK 1 trainer.
+/* Shared presentation for the catalog and all RK trainers.
    All interface colors, type sizes, spacing, radii and control heights come from design-system.css. */
 
 html { scroll-behavior: smooth; }
@@ -292,8 +292,8 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
 .btn-secondary { border-color: var(--color-line); background: var(--color-surface); color: var(--color-ink); }
 .btn-secondary:hover { background: var(--color-surface-soft); }
 .btn:disabled { opacity: .48; }
-.exam-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--space-5); }
-.question-panel { overflow: hidden; }
+.exam-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--space-5); align-items: start; }
+.question-panel { min-width: 0; overflow: hidden; }
 .question-top { padding: var(--space-5) var(--space-6); border-color: var(--color-line); background: var(--color-surface-tint); }
 .question-counter { font-size: var(--font-size-lg); }
 .question-status { color: var(--color-muted); font-size: var(--font-size-sm); }
@@ -334,9 +334,19 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
 .sequence-option:focus-visible, .matching-checks label:focus-within { outline: 3px solid var(--color-primary); outline-offset: var(--space-1); }
 .feedback { border-radius: var(--radius-control); }
 .question-actions { padding: var(--space-4) var(--space-6); border-color: var(--color-line); }
-.side-panel { border-color: var(--color-line); border-radius: var(--radius-card); }
+.side-panel { min-width: 0; top: calc(var(--height-catalog-header) + var(--space-4)); padding: var(--space-4); border-color: var(--color-line); border-radius: var(--radius-card); }
 .question-nav-details > summary { min-height: var(--height-control); display: flex; align-items: center; font-size: var(--font-size-md); }
-.qnav { min-width: var(--height-control); min-height: var(--height-control); border-color: var(--color-line); border-radius: var(--radius-control); font-size: var(--font-size-sm); }
+.question-grid {
+  grid-template-columns: repeat(auto-fit, minmax(var(--height-control), 1fr));
+  gap: var(--space-2);
+  padding: var(--space-1);
+  max-height: max(var(--height-control), calc(100dvh - var(--height-catalog-header) - var(--space-10) - 4 * var(--height-control)));
+  align-content: start;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.qnav { width: 100%; min-width: 0; min-height: var(--height-control); border-color: var(--color-line); border-radius: var(--radius-control); font-size: var(--font-size-md); }
+.qnav:focus-visible { outline-offset: 0; }
 .qnav.current { outline-color: var(--color-primary); }
 .qnav.answered { border-color: var(--color-primary-border); background: var(--color-primary-soft); }
 .qnav.good { border-color: var(--color-success); background: var(--color-success-soft); color: var(--color-success); }
@@ -350,6 +360,19 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
 .bank-id { border-radius: var(--radius-control); background: var(--color-primary-soft); color: var(--color-primary-dark); font-size: var(--font-size-sm); }
 .bank-answer-item { border-color: var(--color-success); border-radius: var(--radius-control); background: var(--color-success-soft); color: var(--color-success); font-size: var(--font-size-md); }
 .result-card, .review-card { padding: var(--space-8); }
+.result-card { position: relative; isolation: isolate; }
+.result-card > :not(.result-confetti) { position: relative; z-index: 1; }
+.result-card h1 { font-size: var(--font-size-display); line-height: var(--line-heading); }
+.result-message { max-width: var(--content-reading-max); margin: var(--space-3) auto var(--space-6); color: var(--color-muted); font-size: var(--font-size-lg); line-height: var(--line-body); }
+.perfect-badge { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); max-width: 100%; margin-bottom: var(--space-5); padding: var(--space-3) var(--space-4); border: 1px solid var(--color-primary-border); border-radius: var(--radius-pill); background: var(--color-primary-soft); color: var(--color-primary-dark); font-size: var(--font-size-md); font-weight: var(--weight-medium); }
+.result-improvement { margin: var(--space-4) auto; color: var(--color-primary-dark); font-size: var(--font-size-md); font-weight: var(--weight-medium); }
+.result-confetti { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.result-confetti i { position: absolute; top: calc(-1 * var(--space-6)); left: var(--piece-left); width: var(--space-2); height: var(--space-3); background: var(--piece-color); opacity: 0; animation: result-confetti-fall 2.4s var(--piece-delay) ease-out forwards; }
+@keyframes result-confetti-fall {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0); }
+  10% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--piece-drift), 100dvh) rotate(var(--piece-turn)); }
+}
 .result-stat { border-color: var(--color-line); border-radius: var(--radius-control); }
 .result-stat strong { font-size: var(--font-size-xl); }
 .result-stat span { color: var(--color-muted); font-size: var(--font-size-sm); }
@@ -365,6 +388,7 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
   .main { padding-inline: var(--space-6); }
   .exam-layout { grid-template-columns: 1fr; }
   .side-panel { position: static; }
+  .question-grid { max-height: 50dvh; }
 }
 
 @media (max-width: 760px) {
@@ -407,6 +431,8 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
   .feature-action { justify-self: stretch; }
   .feature-action .btn-primary { width: 100%; }
   .btn-primary, .btn-secondary { min-height: var(--height-control-mobile); }
+  .tabs .tab { flex: 1; }
+  .tab-status { display: none; }
   .section-heading { margin-top: var(--space-8); }
   .bank-panel, .content-card, .drug-detail { padding: var(--space-5); }
   .bank-panel-heading { align-items: stretch; flex-direction: column; gap: var(--space-3); }
@@ -468,8 +494,6 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
   .question-actions > div { flex: 1; }
   .question-actions .btn { min-height: var(--height-control-mobile); }
   .side-panel { padding: var(--space-4); }
-  .question-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .qnav { min-width: 0; min-height: var(--height-control); }
   .bank-toolbar { position: static; }
   .bank-toolbar-actions .btn { min-height: var(--height-control); font-size: var(--font-size-md); }
   .bank-card > summary { min-height: var(--height-control-mobile); }
@@ -488,5 +512,6 @@ select, .bank-search { min-height: var(--height-control); border-color: var(--co
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .result-confetti { display: none; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }

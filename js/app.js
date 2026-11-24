@@ -12,7 +12,7 @@
   let timerHandle = null;
 
   function defaultProgress() {
-    return { totalAttempts: 0, correctAttempts: 0, perQuestion: {}, mistakes: [], sessions: 0 };
+    return { totalAttempts: 0, correctAttempts: 0, perQuestion: {}, mistakes: [], sessions: 0, lastResults: {} };
   }
 
   function loadProgress() {
@@ -445,7 +445,7 @@
           </div>
           <div class="question-body">
             <h2>${escapeHtml(q.question)}</h2>
-            ${q.sourceNote ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
+            ${q.sourceNote && isPractice && a.checked ? `<p class="source-note">${escapeHtml(q.sourceNote)}</p>` : ""}
             ${q.acceptAny ? `<div class="multi-note">Достаточно выбрать один из допустимых ответов</div>` : ""}
             ${questionKind(q) === "matching" && q.multiple ? `<div class="multi-note">К каждому пункту можно выбрать несколько номеров</div>` : questionKind(q) === "choice" && q.multiple ? `<div class="multi-note">Можно выбрать несколько вариантов</div>` : ""}
             ${inputHtml}
@@ -483,6 +483,14 @@
     `;
     const navDetails = document.getElementById("questionNavDetails");
     if (navDetails) navDetails.open = window.matchMedia("(min-width: 861px)").matches;
+    if (navDetails?.open) {
+      const grid = navDetails.querySelector(".question-grid");
+      const current = grid?.querySelector(".qnav.current");
+      if (current) {
+        // Scroll only the number grid; leave the question and page position intact.
+        grid.scrollTop = current.offsetTop - grid.offsetTop - (grid.clientHeight - current.offsetHeight) / 2;
+      }
+    }
     updateTimerText();
   }
 
@@ -578,10 +586,71 @@
       a.checked = true;
       recordAnswer(q, a);
     });
+    const correct = session.ids.filter(id => session.answers[id].isCorrect).length;
+    const answered = session.ids.filter(id => hasAnswer(qById.get(id), session.answers[id])).length;
+    session.improvement = 0;
+    if (answered) {
+      const comparisonKey = `${session.mode}:${session.ids.length}`;
+      const previous = progress.lastResults?.[comparisonKey];
+      if (previous?.total === session.ids.length && Number.isInteger(previous.correct) && previous.correct >= 0 && previous.correct <= previous.total) {
+        session.improvement = Math.round((correct - previous.correct) / session.ids.length * 100);
+      }
+      progress.lastResults = { ...(progress.lastResults || {}), [comparisonKey]: { correct, total: session.ids.length } };
+    }
     progress.sessions += 1;
     saveProgress();
     clearStoredSession();
     renderResults();
+  }
+
+  function resultFeedback(pct, unanswered, total) {
+    if (unanswered === total) return {
+      title: "Ты пока не ответил на вопросы",
+      message: "Попытка завершена без ответов. Открой разбор или начни заново — впереди ещё всё интересное."
+    };
+    if (pct === 100) return {
+      title: "Полная компенсация",
+      message: "Такие знания — уже уровень нашего архивариуса Леси. Влад и Платон аплодируют: патология обнаружена только в вопросах!"
+    };
+    if (pct >= 90) return {
+      title: "Почти безупречно",
+      message: "С такими знаниями Влад и Платон уже готовы звать тебя в команду. До идеального результата остался один рывок!"
+    };
+    if (pct >= 70) return {
+      title: "Влад и Платон гордятся тобой!",
+      message: "Уверенно идёшь! Разбери оставшиеся ошибки — и до идеального результата рукой подать."
+    };
+    if (pct >= 50) return {
+      title: "База есть. Закрепляем",
+      message: "Ты уже многое знаешь. Разбери ошибки и возвращайся за новым личным рекордом."
+    };
+    if (pct >= 26) return {
+      title: "Картина начинает проясняться",
+      message: "Часть механизмов уже понятна. Повтори сложные темы — и общая картина сложится."
+    };
+    if (pct >= 11) return {
+      title: "Первый контакт состоялся",
+      message: "Теперь понятно, какие темы требуют внимания. Начни с разбора ошибок и двигайся небольшими шагами."
+    };
+    return {
+      title: "Знания пока в латентной фазе",
+      message: "Консилиум в составе Влада и Платона рекомендует разобрать ошибки и повторить заход. Прогноз: обучаемый!"
+    };
+  }
+
+  function resultConfetti() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "";
+    const colors = ["--color-primary", "--color-accent", "--color-primary-border"];
+    return `<div class="result-confetti" aria-hidden="true">${Array.from({ length: 36 }, (_, i) =>
+      `<i style="--piece-left:${(i * 37) % 100}%;--piece-delay:${(i % 6) * 0.07}s;--piece-drift:calc(var(--space-8) * ${i % 7 - 3});--piece-turn:${i % 2 ? 1 : -1}turn;--piece-color:var(${colors[i % colors.length]})"></i>`
+    ).join("")}</div>`;
+  }
+
+  function pointCountLabel(count) {
+    const tail = count % 100;
+    const digit = count % 10;
+    const word = tail >= 11 && tail <= 14 ? "процентных пунктов" : digit === 1 ? "процентный пункт" : digit >= 2 && digit <= 4 ? "процентных пункта" : "процентных пунктов";
+    return `${count} ${word}`;
   }
 
   function renderResults() {
@@ -589,15 +658,22 @@
     const correct = entries.filter(x => x.a.isCorrect).length;
     const unanswered = entries.filter(x => !hasAnswer(x.q, x.a)).length;
     const wrong = entries.length - correct - unanswered;
-    const pct = entries.length ? Math.round(correct / entries.length * 100) : 0;
+    // Rounding must never turn one wrong answer (e.g. 250/251) into 100%.
+    const pct = correct === entries.length ? 100 : Math.min(99, Math.round(correct / entries.length * 100));
+    const feedback = resultFeedback(pct, unanswered, entries.length);
+    const perfect = correct === entries.length && entries.length >= 20;
     const problemIds = entries.filter(x => !x.a.isCorrect).map(x => x.q.id);
     session.problemIds = problemIds;
 
     app.innerHTML = `
       <section class="result-card">
+        ${perfect ? resultConfetti() : ""}
         <div class="score-ring" style="--score:${pct * 3.6}deg"><strong>${pct}%</strong></div>
-        <h1>${pct >= 90 ? "Отличный результат" : pct >= 70 ? "Хорошо" : "Есть что повторить"}</h1>
+        ${perfect ? `<div class="perfect-badge"><span aria-hidden="true">✦</span> Без единого осложнения</div>` : ""}
+        <h1>${escapeHtml(feedback.title)}</h1>
+        <p class="result-message">${escapeHtml(feedback.message)}</p>
         <p>${correct} правильных ответов из ${entries.length}</p>
+        ${session.improvement > 0 ? `<p class="result-improvement">На ${pointCountLabel(session.improvement)} лучше прошлой попытки такого же размера в этом режиме!</p>` : ""}
         <div class="result-stats">
           <div class="result-stat"><strong>${correct}</strong><span>правильно</span></div>
           <div class="result-stat"><strong>${wrong}</strong><span>ошибок</span></div>
@@ -608,6 +684,7 @@
           ${problemIds.length ? `<button class="btn btn-accent" data-action="review-session">Разобрать ${problemIds.length} ${problemIds.length === 1 ? "ошибку" : "ошибок"}</button>` : ""}
         </div>
       </section>`;
+    app.querySelector(".result-card")?.scrollIntoView({ block: "start", behavior: "instant" });
   }
 
   function renderReview(ids = null) {
@@ -683,7 +760,11 @@
     if (jump && session) {
       session.index = Number(jump.dataset.jump);
       persistSession();
-      return renderQuestion();
+      renderQuestion();
+      if (window.matchMedia("(max-width: 1100px)").matches) {
+        app.querySelector(".question-panel")?.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+      return;
     }
 
     const actionEl = event.target.closest("[data-action]");
